@@ -1,10 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <signal.h>
 
-#define MAX_THREADS 80
+#pragma once
+
+#include "../Common/Common.h"
+
+#define MAX_THREADS 5
 
 extern	pthread_t*	threads;
 extern	int*		threadIDs;

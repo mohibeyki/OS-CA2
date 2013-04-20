@@ -12,7 +12,7 @@ int 		size = 1000;
 pthread_t tManT;
 pthread_mutex_t mainMutex = PTHREAD_MUTEX_INITIALIZER;
 
-int main() {
+int main(int argc, char const *argv[]) {
 	int i = 0;
 
 	threads = (pthread_t*) malloc(sizeof(pthread_t) * maxThreads);
