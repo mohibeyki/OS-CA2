@@ -1,5 +1,6 @@
 
 #include "../Common/Common.h"
+#include "Tracker.h"
 
 void error(const char *msg) {
 	perror(msg);
@@ -50,4 +51,38 @@ int main(int argc, char *argv[]) {
 	close(newsockfd);
 	close(sockfd);
 	return 0;
+}
+
+void addPart(Seeder* seeder, int part) {
+	seeder->parts[part / 8] |= 1 << (part % 8);
+}
+
+void removePart(Seeder* seeder, int part) {
+	seeder->parts[part / 8] &= ~(1 << (part % 8));
+}
+
+void addSeeder(char* ip, SharedFile* sharedFile) {
+	if (seedersSize == maxSize) {
+		maxSize += 10;
+		seeders = (Seeder*) realloc(seeders, sizeof(Seeder) * maxSize);
+	}
+	Seeder seeder;
+	strcpy(seeder.ip, ip);
+
+	seeder.parts = (short*) malloc(sizeof(short) * sharedFile.size / 8);
+	int i = 0;
+
+	for (; i < sharedFile.size / 8; ++i)
+		parts[i] = 255;
+
+	sharedFile->seeders[seedersSize] =
+	seedersSize ++;
+}
+
+void initFile(SharedFile* sharedFile, char* fileName, long size) {
+	sharedFile->seeders = (Seeder*) malloc(sizeof(Seeder) * 10);
+	sharedFile->maxSize = 10;
+	sharedFile->seedersSize = 0;
+	sharedFile->fileName = fileName;
+	sharedFile->size = size;
 }
