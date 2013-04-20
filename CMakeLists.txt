@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 2.6)
+project(OS-CA2)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+add_executable(Thread Thread/Thread.c)
