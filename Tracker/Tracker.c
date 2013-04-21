@@ -2,11 +2,6 @@
 #include "../Common/Common.h"
 #include "Tracker.h"
 
-void error(const char *msg) {
-	perror(msg);
-	exit(1);
-}
-
 int main(int argc, char *argv[]) {
 	int 		sockfd, newsockfd, portno;
 	socklen_t 	client;
@@ -62,21 +57,20 @@ void removePart(Seeder* seeder, int part) {
 }
 
 void addSeeder(char* ip, SharedFile* sharedFile) {
-	if (seedersSize == maxSize) {
-		maxSize += 10;
-		seeders = (Seeder*) realloc(seeders, sizeof(Seeder) * maxSize);
+	if (sharedFile->seedersSize == sharedFile->maxSize) {
+		sharedFile->maxSize += 10;
+		sharedFile->seeders = (Seeder*) realloc(sharedFile->seeders, sizeof(Seeder) * sharedFile->maxSize);
 	}
 	Seeder seeder;
 	strcpy(seeder.ip, ip);
 
-	seeder.parts = (short*) malloc(sizeof(short) * sharedFile.size / 8);
+	seeder.parts = (short*) malloc(sizeof(short) * sharedFile->size / 8);
 	int i = 0;
 
-	for (; i < sharedFile.size / 8; ++i)
-		parts[i] = 255;
+	for (; i < sharedFile->size / 8; ++i)
+		seeder.parts[i] = 255;
 
-	sharedFile->seeders[seedersSize] =
-	seedersSize ++;
+	sharedFile->seeders[sharedFile->seedersSize ++] = seeder;
 }
 
 void initFile(SharedFile* sharedFile, char* fileName, long size) {

@@ -1,11 +1,6 @@
 
 #include "../Common/Common.h"
 
-void error(const char *msg) {
-	perror(msg);
-	exit(0);
-}
-
 int main(int argc, char *argv[]) {
 	int sockfd, portno, n;
 	struct sockaddr_in serv_addr;
@@ -18,7 +13,7 @@ int main(int argc, char *argv[]) {
 		error("ERROR opening socket");
 	server = gethostbyname("localhost");
 	if (server == NULL) {
-		fprintf(stderr,"ERROR, no such host\n");
+		fprintf(stderr, "ERROR, no such host\n");
 		exit(0);
 	}
 	memset((char *) &serv_addr, 0, sizeof(serv_addr));
@@ -27,7 +22,7 @@ int main(int argc, char *argv[]) {
 			(char *)&serv_addr.sin_addr.s_addr,
 			server->h_length);
 	serv_addr.sin_port = htons(portno);
-	if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
+	if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
 		error("ERROR connecting");
 
 	printf("Please enter the message: ");
@@ -41,8 +36,7 @@ int main(int argc, char *argv[]) {
 		n = recv(sockfd, buffer, 255, 0);
 		if (n < 0)
 			error("ERROR reading from socket");
-		printf("%s\n",buffer);
-		printf("Please enter the message: ");
+		printf("%s\nPlease enter the message: ", buffer);
 		memset(buffer, 0, BUFFER_SIZE);
 		gets(buffer);
 	}

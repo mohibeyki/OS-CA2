@@ -14,7 +14,7 @@ typedef struct SharedFile {
 	int maxSize;
 } SharedFile;
 
-void initFile(SharedFile* sharedFile);
+void initFile(SharedFile* sharedFile, char* fileName, long size);
 void addPart(Seeder* seeder, int part);
 void removePart(Seeder* seeder, int part);
 void addSeeder(char* ip, SharedFile* sharedFile);

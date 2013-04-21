@@ -3,16 +3,17 @@
 
 pthread_t*	threads;
 int*		threadIDs;
+
 int			maxThreads = 2, activeThreads = 0;
 int 		POWER = 1;
 int			total = 0;
 int*		slots;
 int 		size = 1000;
 
-pthread_t tManT;
-pthread_mutex_t mainMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_t 	tManT;
+pthread_mutex_t 	mainMutex = PTHREAD_MUTEX_INITIALIZER;
 
-int main(int argc, char const *argv[]) {
+int main() {
 	int i = 0;
 
 	threads = (pthread_t*) malloc(sizeof(pthread_t) * maxThreads);
@@ -38,15 +39,16 @@ int main(int argc, char const *argv[]) {
 		slots[i] = id;
 		activeThreads++;
 		pthread_mutex_unlock(&mainMutex);
-		usleep(1000);
+		usleep(10000);
 	}
 
-	for (i = 0; i < size; ++i)
+	for (i = 0; i < size; ++i) {
 		if (slots[i] != -1) {
 			pthread_mutex_lock(&mainMutex);
 			pthread_join(threads[slots[i]], NULL);
 			pthread_mutex_unlock(&mainMutex);
 		}
+	}
 
 	sleep(2);
 

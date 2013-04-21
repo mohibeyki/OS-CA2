@@ -20,3 +20,5 @@
 #define FALSE	0
 #define SERVER_PORT	12345
 #define TRUE	1
+
+void error(const char *msg);
