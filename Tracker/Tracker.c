@@ -8,6 +8,12 @@ int main(int argc, char *argv[]) {
 	char 		buffer[BUFFER_SIZE];
 	struct 		sockaddr_in serv_addr, cli_addr;
 	int 		n;
+	int 		numOfFiles = 0;
+	int 		maxNumOfFiles = 10;
+
+	SharedFile*	files;
+
+	files = (SharedFile *) malloc(sizeof(SharedFile) * maxNumOfFiles);
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
@@ -36,12 +42,115 @@ int main(int argc, char *argv[]) {
 		n = recv(newsockfd, buffer, BUFFER_SIZE, 0);
 		if (n < 0)
 			error("ERROR reading from socket");
-		printf("Here is the message: %s\n", buffer);
-		char newBuff[BUFFER_SIZE] = "You sent : ";
-		strcat(newBuff, buffer);
-		n = send(newsockfd, newBuff, strlen(newBuff), 0);
-		if (n < 0)
-			error("ERROR writing to socket");
+
+		if (strncmp(buffer, "GT", 2) == 0) {
+
+			int index = indexOf(buffer, ' ');
+			char fileName[BUFFER_SIZE];
+			strcpy(fileName, buffer + index + 1);
+			int part = atoi(fileName);
+			strncpy(fileName, buffer + 2, index - 2);
+
+			int j = 0, flag = 0;
+			for (; j < numOfFiles; ++j) {
+				if (strcmp(fileName, files[j].fileName) == 0) {
+					int i = 0;
+					for (; i < files[j].seedersSize; ++i) {
+						if (((files[j].seeders[i].parts[part / 8]) >> (part % 8)) % 2) {
+							flag = 1;
+							strcpy(buffer, files[j].seeders[i].ip);
+							n = send(newsockfd, buffer, strlen(buffer), 0);
+							if (n < 0)
+								error("ERROR writing to socket");
+							removePart(&(files[j].seeders[i]), part);
+							break;
+						}
+					}
+					break;
+				}
+			}
+			if (flag == 0) {
+				n = send(newsockfd, "-1", 2, 0);
+				if (n < 0)
+					error("ERROR writing to socket");
+			}
+		} else if (strncmp(buffer, "SH", 2) == 0) {
+			if (numOfFiles == maxNumOfFiles) {
+				maxNumOfFiles += 10;
+				files = (SharedFile*) realloc(files, sizeof(SharedFile) * maxNumOfFiles);
+			}
+
+			int index = indexOf(buffer, ' ');
+			char fileName[BUFFER_SIZE];
+			strcpy(fileName, buffer + index + 1);
+			long size = atoi(fileName);
+			strncpy(fileName, buffer + 2, index - 2);
+
+			initFile(&(files[numOfFiles]), fileName, size);
+			numOfFiles++;
+
+			inet_ntop(AF_INET, &cli_addr, buffer, BUFFER_SIZE);
+			addSeeder(buffer, &(files[numOfFiles]));
+
+			n = send(newsockfd, "OK", 2, 0);
+			if (n < 0)
+				error("ERROR writing to socket");
+
+		} else if (strncmp(buffer, "GI", 2) == 0) {
+			int j = 0, flag = 0;
+			for (; j < numOfFiles; ++j) {
+				if (strcmp(buffer + 2, files[j].fileName) == 0) {
+					flag = 1;
+					itoal(buffer, files[j].size);
+					n = send(newsockfd, buffer, strlen(buffer), 0);
+					if (n < 0)
+						error("ERROR writing to socket");
+					break;
+				}
+			}
+			if (flag == 0) {
+				n = send(newsockfd, "-1", 2, 0);
+				if (n < 0)
+					error("ERROR writing to socket");
+			}
+		} else if (strncmp(buffer, "JD", 2) == 0) {
+
+			int index = indexOf(buffer, ' ');
+			char fileName[BUFFER_SIZE], sip[BUFFER_SIZE];
+			strncpy(sip, buffer + 2, index - 2);
+			strcpy(buffer, buffer + index + 1);
+			strcpy(fileName, buffer + index + 1);
+			long part = atol(fileName);
+			strncpy(fileName, buffer, index);
+			inet_ntop(AF_INET, &cli_addr, buffer, BUFFER_SIZE);
+
+			int j = 0, flag = 0;
+			for (; j < numOfFiles; ++j) {
+				if (strcmp(fileName, files[j].fileName) == 0) {
+					int i = 0;
+					for (; i < files[j].seedersSize; ++i) {
+						if (strcmp(files[j].seeders[i].ip, sip) == 0 || strcmp(files[j].seeders[i].ip, buffer) == 0) {
+							flag = 1;
+							n = send(newsockfd, "OK", 2, 0);
+							if (n < 0)
+								error("ERROR writing to socket");
+							addPart(&(files[j].seeders[i]), part);
+						}
+					}
+					break;
+				}
+			}
+			if (flag == 0) {
+				n = send(newsockfd, "-1", 2, 0);
+				if (n < 0)
+					error("ERROR writing to socket");
+			}
+
+		} else {
+			n = send(newsockfd, "Invalid", 7, 0);
+			if (n < 0)
+				error("ERROR writing to socket");
+		}
 	}
 	close(newsockfd);
 	close(sockfd);
@@ -49,11 +158,11 @@ int main(int argc, char *argv[]) {
 }
 
 void addPart(Seeder* seeder, int part) {
-	seeder->parts[part / 8] |= 1 << (part % 8);
+	seeder->parts[part / 8] |= 1 << (part % 8 - 1);
 }
 
 void removePart(Seeder* seeder, int part) {
-	seeder->parts[part / 8] &= ~(1 << (part % 8));
+	seeder->parts[part / 8] &= ~(1 << (part % 8 - 1));
 }
 
 void addSeeder(char* ip, SharedFile* sharedFile) {

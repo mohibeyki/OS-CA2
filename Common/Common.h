@@ -15,10 +15,12 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 #define BUFFER_SIZE	128 * 4
-#define FALSE	0
+#define PACKET_SIZE	128
 #define SERVER_PORT	12345
-#define TRUE	1
+#define FALSE		0
+#define TRUE		1
 
 void error(const char *msg);
