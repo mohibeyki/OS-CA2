@@ -16,7 +16,10 @@ extern	int 		IS_ALIVE;
 extern	pthread_t 	tManT;
 extern	pthread_mutex_t 	mainMutex;
 
-void	init();
+void 	initializeThreadManager();
+void 	runThread(void* func);
+void	killThreadManager();
+void 	joinThreads();
 void 	printAndKill(int id);
 int 	getSlot();
 void 	ArrangeSlots();

@@ -14,12 +14,12 @@ int 		size = 1000;
 pthread_t 	tManT;
 pthread_mutex_t 	mainMutex = PTHREAD_MUTEX_INITIALIZER;
 
-void init() {
+void initializeThreadManager() {
 	int i = 0;
-
 	threads = (pthread_t*) malloc(sizeof(pthread_t) * maxThreads);
 	threadIDs = (int*) malloc(sizeof(int) * maxThreads);
 	threadStates = (int*) malloc(sizeof(int) * maxThreads);
+
 	for (; i < maxThreads; ++i)
 		threadStates[i] = -1;
 	slots = (int*) malloc(sizeof(int) * GLOBAL_MAX_THREADS_ALLOWED);
@@ -28,48 +28,40 @@ void init() {
 		slots[i] = -1;
 
 	pthread_create(&tManT, NULL, (void*) &threadManager, NULL);
-
-	i = 0;
-	for (; i < size; ++i) {
-		int j = getSlot();
-		while (j == -1) {
-			usleep(10000);
-			j = getSlot();
-		}
-		int id = getFreeThreadID();
-		while (id == -1) {
-			usleep(10000);
-			id = getFreeThreadID();
-		}
-		total++;
-		activeThreads++;
-		pthread_mutex_lock(&mainMutex);
-		threadIDs[id] = pthread_create(&(threads[id]), NULL,(void*) &printAndKill, j);
-		slots[j] = id;
-		pthread_mutex_unlock(&mainMutex);
-		usleep(10000);
-	}
-
-	for (i = 0; i < maxThreads; ++i) {
-		if (threadStates[i] != -1) {
-			pthread_mutex_lock(&mainMutex);
-			pthread_join(threads[i], NULL);
-			pthread_mutex_unlock(&mainMutex);
-		}
-	}
-
-	sleep(2);
-
-	POWER = 0;
-	pthread_join(tManT, NULL);
-	return 0;
 }
 
-void printAndKill(int id) {
-	int j = 0;
-	for (; j < 100000000; ++j);
-	freeThread(id);
-	activeThreads--;
+void killThreadManager() {
+	POWER = 0;
+	pthread_join(tManT, NULL);
+}
+
+void runThread(void* func) {
+	int j = getSlot();
+	while (j == -1) {
+		usleep(10000);
+		j = getSlot();
+	}
+	int id = getFreeThreadID();
+	while (id == -1) {
+		usleep(10000);
+		id = getFreeThreadID();
+	}
+	total++;
+	activeThreads++;
+	pthread_mutex_lock(&mainMutex);
+	threadIDs[id] = pthread_create(&(threads[id]), NULL, func, j);
+	threadStates[id] = 1;
+	slots[j] = id;
+	pthread_mutex_unlock(&mainMutex);
+}
+
+void joinThreads() {
+	while (activeThreads > 0) {
+		int i = 0;
+		for (; i < maxThreads; ++i)
+			if (threadStates[i] != -1)
+				pthread_join(threads[i], NULL);
+	}
 }
 
 int getSlot() {
@@ -117,6 +109,7 @@ void threadManager() {
 			threadStates = (int *) realloc(threadStates, sizeof(int) * maxThreads);
 			pthread_mutex_unlock(&mainMutex);
 		}
+		usleep(10000);
 	}
 	pthread_kill(tManT, SIGINT);
 }
@@ -132,5 +125,6 @@ int getFreeThreadID() {
 void freeThread(int id) {
 	threadStates[slots[id]] = -1;
 	slots[id] = -1;
-	printf("Total:%d\tA:%d\tM:%d\n", total, activeThreads, maxThreads);
+	activeThreads--;
+	printf("A Connectiong has been closed\nTotal Threads:%d\tA:%d\tM:%d\n", total, activeThreads, maxThreads);
 }

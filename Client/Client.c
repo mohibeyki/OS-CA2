@@ -6,8 +6,11 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
 
+	if (argc != 2)
+		exit(1);
+
 	char buffer[BUFFER_SIZE];
-	portno = atoi("12345");
+	portno = atoi(argv[1]);
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
 		error("ERROR opening socket");
@@ -28,7 +31,7 @@ int main(int argc, char *argv[]) {
 	printf("Please enter the message: ");
 	memset(buffer, 0, BUFFER_SIZE);
 	gets(buffer);
-	while (strcmp(buffer, "EXIT")) {
+	while (strcmp(buffer, "EXIT") && strcmp(buffer, "EXITALL")) {
 		n = send(sockfd, buffer, strlen(buffer), 0);
 		if (n < 0)
 			error("ERROR writing to socket");
@@ -40,7 +43,7 @@ int main(int argc, char *argv[]) {
 		memset(buffer, 0, BUFFER_SIZE);
 		gets(buffer);
 	}
-	send(sockfd, "EXIT", 4, 0);
+	send(sockfd, buffer, strlen(buffer), 0);
 	close(sockfd);
 	return 0;
 }

@@ -19,7 +19,6 @@
 
 #define BUFFER_SIZE	128 * 4
 #define PACKET_SIZE	128
-#define SERVER_PORT	12345
 #define FALSE		0
 #define TRUE		1
 

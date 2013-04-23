@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
 project(OS-CA2)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
-add_executable(Tracker Tracker/Tracker.c Common/Common.c Common/Utilities/StringUtil.c)
+set(CMAKE_C_FLAGS "-pthread")
+add_executable(Tracker Tracker/Tracker.c Common/Common.c Common/Utilities/StringUtil.c Thread/Thread.c)
 add_executable(Client Client/Client.c Common/Common.c)
