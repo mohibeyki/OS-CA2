@@ -1,21 +1,30 @@
 
 #pragma once
 
+#include "../Common/Common.h"
+
 typedef struct Seeder {
-	char 	ip[16];
 	unsigned short*	parts;
-	int 	socketfd;
+	int 	sockfd;
+	int 	id;
+	char	ip[16];
 } Seeder;
 
 typedef struct SharedFile {
 	Seeder*	seeders;
-	char* 	fileName;
+	char 	fileName[BUFFER_SIZE];
 	long 	size;
 	int 	seedersSize;
 	int 	maxSize;
 } SharedFile;
 
-void initFile(SharedFile* sharedFile, char* fileName, long size);
+typedef struct Socket {
+	int 	sockfd;
+	char	socketBuffer[BUFFER_SIZE];
+} Socket;
+
+void initFile(SharedFile* sharedFile, char* fileName, long long size);
 void addPart(Seeder* seeder, int part);
 void removePart(Seeder* seeder, int part);
-void addSeeder(char* ip, SharedFile* sharedFile, int sockfd);
+void addSeeder(char* ip, int id, SharedFile* sharedFile, int sockfd);
+void addPeer(char* ip, int id, SharedFile* sharedFile, int sockfd);

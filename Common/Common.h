@@ -17,9 +17,10 @@
 #include <unistd.h>
 #include <stdarg.h>
 
-#define BUFFER_SIZE	128 * 4
+#define BUFFER_SIZE	128 *4
 #define PACKET_SIZE	128
-#define FALSE		0
-#define TRUE		1
+#define FALSE	0
+#define TRUE	1
+#define STDIN	0
 
 void error(const char *msg);

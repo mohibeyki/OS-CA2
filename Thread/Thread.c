@@ -126,5 +126,5 @@ void freeThread(int id) {
 	threadStates[slots[id]] = -1;
 	slots[id] = -1;
 	activeThreads--;
-	printf("A Connectiong has been closed\nTotal Threads:%d\tA:%d\tM:%d\n", total, activeThreads, maxThreads);
+	printf("A Connection has been closed\nTotal Threads:%d\tA:%d\tM:%d\n", total, activeThreads, maxThreads);
 }
